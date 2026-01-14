@@ -1,0 +1,807 @@
+{% extends 'base.html' %}
+{% load dict_filters %}
+
+{% block 'title' %}Ponto de Equilíbrio - Agro Dash{% endblock %}
+
+{% block 'body' %}
+<style>
+  .sticky-col {
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 10;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sticky-col-header {
+    position: sticky;
+    left: 0;
+    background-color: #f9fafb;
+    z-index: 20;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .table-pe {
+    font-size: 0.75rem;
+  }
+  
+  .table-pe th,
+  .table-pe td {
+    padding: 0.5rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+  
+  .table-pe th:first-child,
+  .table-pe td:first-child {
+    text-align: left;
+    min-width: 180px;
+  }
+  
+  .input-pe {
+    width: 100%;
+    padding: 0.25rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    text-align: right;
+  }
+</style>
+
+<el-dialog>
+  <dialog id="sidebar" class="backdrop:bg-transparent xl:hidden">
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-closed:opacity-0"></el-dialog-backdrop>
+
+    <div tabindex="0" class="fixed inset-0 flex focus:outline-none">
+      <el-dialog-panel class="group/dialog-panel relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-closed:-translate-x-full">
+        <div class="absolute top-0 left-full flex w-16 justify-center pt-5 duration-300 ease-in-out group-data-closed/dialog-panel:opacity-0">
+          <button type="button" command="close" commandfor="sidebar" class="-m-2.5 p-2.5">
+            <span class="sr-only">Close sidebar</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-white">
+              <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="relative flex grow flex-col gap-y-5 overflow-y-auto bg-gray-50 px-6">
+          <div class="relative flex h-16 shrink-0 items-center">
+            <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Agro Dash" class="h-8 w-auto" />
+          </div>
+          <nav class="relative flex flex-1 flex-col">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+              <li>
+                <ul role="list" class="-mx-2 space-y-1">
+                  <li>
+                    <a href="{% url 'home' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Home
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'preencher_informacoes' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Settings
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'lotes' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M3.75 21h16.5M4.5 3h15m-15 0v18m15-18v18M9 3v18m6-18v18M4.5 9h15M4.5 15h15" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Lotes
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Dashboard
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Nutricional
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'nutricional_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Dashboard Nutricional
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'faturamento' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h1.125A2.25 2.25 0 0 1 21 13.5V15m-1.5-1.5v-1.5A2.25 2.25 0 0 0 18 10.5H15.75m-3.75 0H12m-1.5 1.5v6.75m0 0H12m-1.5-1.5H12m-1.5-1.5h1.125c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125H12m-1.5-1.5H9.75" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Faturamento
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'fluxo_caixa' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M12 6v12m-3-3h6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Fluxo de Caixa
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'ponto_equilibrio' %}" class="group flex gap-x-3 rounded-md bg-gray-100 p-2 text-sm/6 font-semibold text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-indigo-600">
+                        <path d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364 6.364L16.95 16.95M7.05 7.05 4.636 4.636m14.728 0L16.95 7.05M7.05 16.95l-2.414 2.414" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Ponto de Equilíbrio
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="-mx-6 mt-auto">
+                <a href="{% url 'logout' %}" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100">
+                  {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="" class="size-8 rounded-full bg-gray-100 object-cover outline -outline-offset-1 outline-black/5" />
+                  {% else %}
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full bg-gray-100 outline -outline-offset-1 outline-black/5" />
+                  {% endif %}
+                  <span class="sr-only">Your profile</span>
+                  <span aria-hidden="true">{{ user.get_full_name }}</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+
+<!-- Static sidebar for desktop -->
+<div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
+  <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-50 px-6 ring-1 ring-gray-200">
+    <div class="flex h-16 shrink-0 items-center">
+      <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Agro Dash" class="h-8 w-auto" />
+    </div>
+    <nav class="flex flex-1 flex-col">
+      <ul role="list" class="flex flex-1 flex-col gap-y-7">
+        <li>
+          <ul role="list" class="-mx-2 space-y-1">
+            <li>
+              <a href="{% url 'home' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Home
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'preencher_informacoes' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Settings
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'lotes' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M3.75 21h16.5M4.5 3h15m-15 0v18m15-18v18M9 3v18m6-18v18M4.5 9h15M4.5 15h15" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Lotes
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Nutricional
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'nutricional_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Dashboard Nutricional
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'faturamento' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h1.125A2.25 2.25 0 0 1 21 13.5V15m-1.5-1.5v-1.5A2.25 2.25 0 0 0 18 10.5H15.75m-3.75 0H12m-1.5 1.5v6.75m0 0H12m-1.5-1.5H12m-1.5-1.5h1.125c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125H12m-1.5-1.5H9.75" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Faturamento
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'fluxo_caixa' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M12 6v12m-3-3h6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Fluxo de Caixa
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'ponto_equilibrio' %}" class="group flex gap-x-3 rounded-md bg-gray-100 p-2 text-sm/6 font-semibold text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-indigo-600">
+                  <path d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364 6.364L16.95 16.95M7.05 7.05 4.636 4.636m14.728 0L16.95 7.05M7.05 16.95l-2.414 2.414" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Ponto de Equilíbrio
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="-mx-6 mt-auto">
+          <a href="{% url 'logout' %}" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100">
+            {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="" class="size-8 rounded-full bg-gray-100 object-cover outline -outline-offset-1 outline-black/5" />
+            {% else %}
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full bg-gray-100 outline -outline-offset-1 outline-black/5" />
+            {% endif %}
+            <span class="sr-only">Your profile</span>
+            <span aria-hidden="true">{{ user.get_full_name }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<div class="xl:pl-72">
+  <main class="flex-1 overflow-y-auto">
+    <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      <button type="button" command="open" commandfor="sidebar" class="-m-2.5 p-2.5 text-gray-700 xl:hidden">
+        <span class="sr-only">Open sidebar</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+          <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="h-6 w-px bg-gray-200 xl:hidden" aria-hidden="true"></div>
+      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        <div class="relative flex flex-1 items-center">
+          <h1 class="text-xl font-semibold text-gray-900">Ponto de Equilíbrio</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="ano-select" class="text-sm font-medium text-gray-700">Ano:</label>
+          <select id="ano-select" onchange="window.location.href='?ano=' + this.value" class="rounded-md border border-gray-300 px-3 py-1 text-sm">
+            {% for y in anos_lista %}
+              <option value="{{ y }}" {% if ano == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {% if messages %}
+      <div class="px-4 py-4 sm:px-6 lg:px-8">
+        {% for message in messages %}
+          <div class="rounded-md p-4 mb-2 {% if message.tags == 'error' %}bg-red-50 text-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-yellow-50 text-yellow-800{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="px-4 py-8 sm:px-6 lg:px-8">
+      {% if dados_lotes %}
+        <!-- Seletor de Lote -->
+        <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div class="flex items-center gap-4">
+            <label for="lote-select" class="text-sm font-medium text-gray-700">Selecione o Lote:</label>
+            <select id="lote-select" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              {% for lote_data in dados_lotes %}
+                <option value="lote_{{ lote_data.lote_id }}" {% if forloop.first %}selected{% endif %}>{{ lote_data.lote_nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        {% for lote_data in dados_lotes %}
+        <div class="lote-container mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6" id="lote_{{ lote_data.lote_id }}" {% if not forloop.first %}style="display: none;"{% endif %}>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ lote_data.lote_nome }}</h2>
+          
+          <form method="POST" class="mb-4">
+            {% csrf_token %}
+            <input type="hidden" name="ano" value="{{ ano }}">
+            <input type="hidden" name="salvar_mortalidade" value="1">
+            
+            <div class="overflow-x-auto">
+              <table class="table-pe min-w-full border border-gray-300" id="tabelaPE{{ lote_data.lote_id }}">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="sticky-col-header border border-gray-300 px-2 py-2 text-left text-xs font-semibold text-gray-900">MÉTRICA</th>
+                    {% for mes_num in meses_lista %}
+                      <th class="border border-gray-300 px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                        {{ meses_abrev|get_item:mes_num }}-{{ ano|stringformat:"s"|slice:"-2:" }}
+                      </th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Quantidade</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {{ lote_data.quantidade }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Entrada @</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_arroba"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Entrada Kg</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_kg"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Saída (kg)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_saida_kg"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Custo da Diária</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"custo_diaria"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Ganho de Peso Dia (Kg)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"ganho_peso_dia"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr class="bg-yellow-50">
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-yellow-50">Mortalidade (%)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2">
+                        <input type="number" 
+                               name="mortalidade_lote_{{ lote_data.lote_id }}_mes_{{ mes_num }}" 
+                               step="0.01" 
+                               min="0"
+                               max="100"
+                               value="{% if lote_data.meses|get_item:mes_num %}{{ lote_data.meses|get_item:mes_num|get_item:"mortalidade_percentual"|floatformat:2 }}{% else %}0{% endif %}"
+                               class="input-pe">
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr class="bg-blue-50">
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-blue-50">Ponto de Equilíbrio @</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right font-semibold text-gray-900 bg-blue-50">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"ponto_equilibrio"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="mt-4">
+              <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                Salvar Mortalidade
+              </button>
+            </div>
+          </form>
+
+          <!-- Seleção de Gráficos -->
+          <div class="mt-8 bg-gray-50 rounded-lg p-4 mb-4">
+            <h3 class="text-md font-semibold text-gray-900 mb-4">Selecione os gráficos para exibir:</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="ponto_equilibrio" 
+                       checked>
+                <span class="text-sm text-gray-700">Ponto de Equilíbrio</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="peso_entrada_arroba">
+                <span class="text-sm text-gray-700">Peso de Entrada @</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="peso_entrada_kg">
+                <span class="text-sm text-gray-700">Peso de Entrada Kg</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="peso_saida_kg">
+                <span class="text-sm text-gray-700">Peso de Saída (kg)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="custo_diaria">
+                <span class="text-sm text-gray-700">Custo da Diária</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" 
+                       class="grafico-checkbox" 
+                       data-lote="{{ lote_data.lote_id }}" 
+                       data-tipo="ganho_peso_dia">
+                <span class="text-sm text-gray-700">Ganho de Peso Dia (Kg)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Gráficos -->
+          <div class="mt-4">
+            <h3 class="text-md font-semibold text-gray-900 mb-4">Gráficos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Ponto de Equilíbrio -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="ponto_equilibrio" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Ponto de Equilíbrio</h4>
+                <canvas id="grafico_ponto_equilibrio_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+              
+              <!-- Peso de Entrada @ -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="peso_entrada_arroba" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Peso de Entrada @</h4>
+                <canvas id="grafico_peso_entrada_arroba_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+              
+              <!-- Peso de Entrada Kg -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="peso_entrada_kg" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Peso de Entrada Kg</h4>
+                <canvas id="grafico_peso_entrada_kg_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+              
+              <!-- Peso de Saída (kg) -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="peso_saida_kg" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Peso de Saída (kg)</h4>
+                <canvas id="grafico_peso_saida_kg_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+              
+              <!-- Custo da Diária -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="custo_diaria" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Custo da Diária</h4>
+                <canvas id="grafico_custo_diaria_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+              
+              <!-- Ganho de Peso Dia (Kg) -->
+              <div class="grafico-container bg-gray-50 rounded-lg p-4" data-tipo="ganho_peso_dia" data-lote="{{ lote_data.lote_id }}" style="display: none;">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Ganho de Peso Dia (Kg)</h4>
+                <canvas id="grafico_ganho_peso_dia_{{ lote_data.lote_id }}" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <p class="text-sm text-gray-500">Nenhum lote com projeções cadastradas. Cadastre lotes e projeções de ganho primeiro.</p>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- jQuery e DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  // Inicializar DataTables para todas as tabelas
+  {% for lote_data in dados_lotes %}
+  $('#tabelaPE{{ lote_data.lote_id }}').DataTable({
+    language: {
+      url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+    },
+    pageLength: 50,
+    order: [],
+    scrollX: true,
+    scrollY: '400px',
+    scrollCollapse: true,
+    fixedColumns: {
+      left: 1
+    },
+    paging: false,
+    searching: false,
+    info: false
+  });
+  {% endfor %}
+
+  // Seletor de lote
+  $('#lote-select').on('change', function() {
+    var loteSelecionado = $(this).val();
+    $('.lote-container').hide();
+    $('#' + loteSelecionado).show();
+    
+    // Atualizar gráficos do lote selecionado
+    {% for lote_data in dados_lotes %}
+    if (loteSelecionado === 'lote_{{ lote_data.lote_id }}') {
+      if (typeof atualizarGraficos{{ lote_data.lote_id }} === 'function') {
+        atualizarGraficos{{ lote_data.lote_id }}();
+      }
+    }
+    {% endfor %}
+  });
+
+  // Preparar dados para cada lote
+  {% for lote_data in dados_lotes %}
+  var dadosGraficos{{ lote_data.lote_id }} = {
+    labels: [],
+    ponto_equilibrio: [],
+    peso_entrada_arroba: [],
+    peso_entrada_kg: [],
+    peso_saida_kg: [],
+    custo_diaria: [],
+    ganho_peso_dia: []
+  };
+  
+  {% for mes_num in meses_lista %}
+    {% if lote_data.meses|get_item:mes_num %}
+      dadosGraficos{{ lote_data.lote_id }}.labels.push('{{ meses_abrev|get_item:mes_num }}-{{ ano|stringformat:"s"|slice:"-2:" }}');
+      dadosGraficos{{ lote_data.lote_id }}.ponto_equilibrio.push({{ lote_data.meses|get_item:mes_num|get_item:"ponto_equilibrio"|floatformat:2 }});
+      dadosGraficos{{ lote_data.lote_id }}.peso_entrada_arroba.push({{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_arroba"|floatformat:2 }});
+      dadosGraficos{{ lote_data.lote_id }}.peso_entrada_kg.push({{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_kg"|floatformat:2 }});
+      dadosGraficos{{ lote_data.lote_id }}.peso_saida_kg.push({{ lote_data.meses|get_item:mes_num|get_item:"peso_saida_kg"|floatformat:2 }});
+      dadosGraficos{{ lote_data.lote_id }}.custo_diaria.push({{ lote_data.meses|get_item:mes_num|get_item:"custo_diaria"|floatformat:2 }});
+      dadosGraficos{{ lote_data.lote_id }}.ganho_peso_dia.push({{ lote_data.meses|get_item:mes_num|get_item:"ganho_peso_dia"|floatformat:2 }});
+    {% endif %}
+  {% endfor %}
+  
+  // Configurações de datasets
+  var configDatasets{{ lote_data.lote_id }} = {
+    ponto_equilibrio: {
+      label: 'Ponto de Equilíbrio (R$/@)',
+      data: dadosGraficos{{ lote_data.lote_id }}.ponto_equilibrio,
+      borderColor: 'rgb(99, 102, 241)',
+      backgroundColor: 'rgba(99, 102, 241, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+    },
+    peso_entrada_arroba: {
+      label: 'Peso de Entrada (@)',
+      data: dadosGraficos{{ lote_data.lote_id }}.peso_entrada_arroba,
+      borderColor: 'rgb(34, 197, 94)',
+      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' @';
+      }
+    },
+    peso_entrada_kg: {
+      label: 'Peso de Entrada (Kg)',
+      data: dadosGraficos{{ lote_data.lote_id }}.peso_entrada_kg,
+      borderColor: 'rgb(59, 130, 246)',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kg';
+      }
+    },
+    peso_saida_kg: {
+      label: 'Peso de Saída (Kg)',
+      data: dadosGraficos{{ lote_data.lote_id }}.peso_saida_kg,
+      borderColor: 'rgb(239, 68, 68)',
+      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kg';
+      }
+    },
+    custo_diaria: {
+      label: 'Custo da Diária (R$/dia)',
+      data: dadosGraficos{{ lote_data.lote_id }}.custo_diaria,
+      borderColor: 'rgb(245, 158, 11)',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+    },
+    ganho_peso_dia: {
+      label: 'Ganho de Peso Dia (Kg)',
+      data: dadosGraficos{{ lote_data.lote_id }}.ganho_peso_dia,
+      borderColor: 'rgb(168, 85, 247)',
+      backgroundColor: 'rgba(168, 85, 247, 0.1)',
+      yAxisID: 'y',
+      format: function(value) {
+        return value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kg';
+      }
+    }
+  };
+  
+  // Função para criar/atualizar gráfico individual
+  function criarGrafico{{ lote_data.lote_id }}(tipo) {
+    var config = configDatasets{{ lote_data.lote_id }}[tipo];
+    if (!config) return;
+    
+    var canvasId = 'grafico_' + tipo + '_{{ lote_data.lote_id }}';
+    var ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    
+    var chartKey = 'chart_' + tipo + '_{{ lote_data.lote_id }}';
+    
+    if (window[chartKey]) {
+      // Atualizar gráfico existente
+      window[chartKey].data.labels = dadosGraficos{{ lote_data.lote_id }}.labels;
+      window[chartKey].data.datasets[0].data = config.data;
+      window[chartKey].update();
+    } else {
+      // Criar novo gráfico
+      window[chartKey] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dadosGraficos{{ lote_data.lote_id }}.labels,
+          datasets: [{
+            label: config.label,
+            data: config.data,
+            borderColor: config.borderColor,
+            backgroundColor: config.backgroundColor,
+            borderWidth: 2,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: config.borderColor,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            format: config.format
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  var dataset = context.dataset;
+                  var format = dataset.format || function(v) { return v; };
+                  return dataset.label + ': ' + format(context.parsed.y);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              ticks: {
+                callback: function(value) {
+                  return value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Mês'
+              }
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    }
+  }
+  
+  // Função para atualizar visibilidade e gráficos
+  function atualizarGraficos{{ lote_data.lote_id }}() {
+    $('.grafico-checkbox[data-lote="{{ lote_data.lote_id }}"]').each(function() {
+      var tipo = $(this).data('tipo');
+      var isChecked = $(this).is(':checked');
+      var container = $('.grafico-container[data-tipo="' + tipo + '"][data-lote="{{ lote_data.lote_id }}"]');
+      
+      if (isChecked) {
+        container.show();
+        criarGrafico{{ lote_data.lote_id }}(tipo);
+      } else {
+        container.hide();
+        var chartKey = 'chart_' + tipo + '_{{ lote_data.lote_id }}';
+        if (window[chartKey]) {
+          window[chartKey].destroy();
+          window[chartKey] = null;
+        }
+      }
+    });
+  }
+  
+  // Event listeners para checkboxes
+  $('.grafico-checkbox[data-lote="{{ lote_data.lote_id }}"]').on('change', function() {
+    atualizarGraficos{{ lote_data.lote_id }}();
+  });
+  
+  // Inicializar gráficos
+  atualizarGraficos{{ lote_data.lote_id }}();
+  {% endfor %}
+});
+</script>
+
+{% endblock %}
+

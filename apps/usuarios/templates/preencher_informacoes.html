@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+
+{% block 'title' %}Preencher Informações Básicas - Agro Dash{% endblock %}
+
+{% block 'body' %}
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Informações Básicas da Propriedade</h1>
+      <p class="mt-2 text-sm text-gray-600">Por favor, preencha todas as informações solicitadas sobre sua propriedade rural.</p>
+    </div>
+
+    {% if messages %}
+      <div class="mb-6">
+        {% for message in messages %}
+          <div class="rounded-md p-4 mb-2 {% if message.tags == 'error' %}bg-red-50 text-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-yellow-50 text-yellow-800{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-12">
+      {% csrf_token %}
+      
+      <!-- DADOS BÁSICOS/INICIAIS -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Dados Básicos/Iniciais</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label for="{{ form.proprietario.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.proprietario.label }}</label>
+            <div class="mt-2">
+              {{ form.proprietario }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.municipio_estado.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.municipio_estado.label }}</label>
+            <div class="mt-2">
+              {{ form.municipio_estado }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.proprio_ou_arrendamento.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.proprio_ou_arrendamento.label }}</label>
+            <div class="mt-2">
+              {{ form.proprio_ou_arrendamento }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.indice_pluviometrico.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.indice_pluviometrico.label }}</label>
+            <div class="mt-2">
+              {{ form.indice_pluviometrico }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.area_total_ha.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.area_total_ha.label }}</label>
+            <div class="mt-2">
+              {{ form.area_total_ha }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.area_util_pastagem_ha.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.area_util_pastagem_ha.label }}</label>
+            <div class="mt-2">
+              {{ form.area_util_pastagem_ha }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Área</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label for="{{ form.quantidade_pastos.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.quantidade_pastos.label }}</label>
+            <div class="mt-2">
+              {{ form.quantidade_pastos }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tamanho_medio_pastos.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tamanho_medio_pastos.label }}</label>
+            <div class="mt-2">
+              {{ form.tamanho_medio_pastos }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.faz_rotacionado }}
+              <label for="{{ form.faz_rotacionado.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.faz_rotacionado.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.percentual_area_rotacionada.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.percentual_area_rotacionada.label }}</label>
+            <div class="mt-2">
+              {{ form.percentual_area_rotacionada }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.faz_adubacao }}
+              <label for="{{ form.faz_adubacao.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.faz_adubacao.label }}</label>
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.faz_correcao_solo }}
+              <label for="{{ form.faz_correcao_solo.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.faz_correcao_solo.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.rotina_correcao.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.rotina_correcao.label }}</label>
+            <div class="mt-2">
+              {{ form.rotina_correcao }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.possui_area_volumoso }}
+              <label for="{{ form.possui_area_volumoso.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.possui_area_volumoso.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tamanho_area_volumoso_ha.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tamanho_area_volumoso_ha.label }}</label>
+            <div class="mt-2">
+              {{ form.tamanho_area_volumoso_ha }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.faz_integracao_lavoura_pecuaria }}
+              <label for="{{ form.faz_integracao_lavoura_pecuaria.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.faz_integracao_lavoura_pecuaria.label }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUÇÃO -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Produção</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label for="{{ form.quantidade_animais.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.quantidade_animais.label }}</label>
+            <div class="mt-2">
+              {{ form.quantidade_animais }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.sexo_animais.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.sexo_animais.label }}</label>
+            <div class="mt-2">
+              {{ form.sexo_animais }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tipo_raca_animais.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tipo_raca_animais.label }}</label>
+            <div class="mt-2">
+              {{ form.tipo_raca_animais }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tipo_suplementacao.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tipo_suplementacao.label }}</label>
+            <div class="mt-2">
+              {{ form.tipo_suplementacao }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.cria_recria_ou_engorda.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.cria_recria_ou_engorda.label }}</label>
+            <div class="mt-2">
+              {{ form.cria_recria_ou_engorda }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="{{ form.quantidade_animais_lote_peso.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.quantidade_animais_lote_peso.label }}</label>
+            <div class="mt-2">
+              {{ form.quantidade_animais_lote_peso }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.compra_gado_produtor_ou_leilao.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.compra_gado_produtor_ou_leilao.label }}</label>
+            <div class="mt-2">
+              {{ form.compra_gado_produtor_ou_leilao }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tipo_terminacao.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tipo_terminacao.label }}</label>
+            <div class="mt-2">
+              {{ form.tipo_terminacao }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.taxa_desfrute.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.taxa_desfrute.label }}</label>
+            <div class="mt-2">
+              {{ form.taxa_desfrute }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.idade_media_abate.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.idade_media_abate.label }}</label>
+            <div class="mt-2">
+              {{ form.idade_media_abate }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="{{ form.plantas_frigorificas.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.plantas_frigorificas.label }}</label>
+            <div class="mt-2">
+              {{ form.plantas_frigorificas }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GESTÃO -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Gestão</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label for="{{ form.quantidade_funcionarios.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.quantidade_funcionarios.label }}</label>
+            <div class="mt-2">
+              {{ form.quantidade_funcionarios }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.utiliza_software_gestao }}
+              <label for="{{ form.utiliza_software_gestao.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.utiliza_software_gestao.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.qual_software_gestao.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.qual_software_gestao.label }}</label>
+            <div class="mt-2">
+              {{ form.qual_software_gestao }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.possui_balanca }}
+              <label for="{{ form.possui_balanca.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.possui_balanca.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.frequencia_pesagem.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.frequencia_pesagem.label }}</label>
+            <div class="mt-2">
+              {{ form.frequencia_pesagem }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.utiliza_controle_individual }}
+              <label for="{{ form.utiliza_controle_individual.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.utiliza_controle_individual.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.tipo_brinco_chip.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.tipo_brinco_chip.label }}</label>
+            <div class="mt-2">
+              {{ form.tipo_brinco_chip }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERMINAÇÃO -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Terminação</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.faz_confinamento }}
+              <label for="{{ form.faz_confinamento.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.faz_confinamento.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.estatico_confinamento.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.estatico_confinamento.label }}</label>
+            <div class="mt-2">
+              {{ form.estatico_confinamento }}
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.tem_fabrica_racao }}
+              <label for="{{ form.tem_fabrica_racao.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.tem_fabrica_racao.label }}</label>
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.possui_moinho }}
+              <label for="{{ form.possui_moinho.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.possui_moinho.label }}</label>
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center">
+              {{ form.possui_vagao_forrageiro }}
+              <label for="{{ form.possui_vagao_forrageiro.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-900">{{ form.possui_vagao_forrageiro.label }}</label>
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.capacidade_armazenagem_volumoso.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.capacidade_armazenagem_volumoso.label }}</label>
+            <div class="mt-2">
+              {{ form.capacidade_armazenagem_volumoso }}
+            </div>
+          </div>
+          <div>
+            <label for="{{ form.capacidade_armazenagem_graos.id_for_label }}" class="block text-sm font-medium text-gray-900">{{ form.capacidade_armazenagem_graos.label }}</label>
+            <div class="mt-2">
+              {{ form.capacidade_armazenagem_graos }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          Salvar Informações
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
