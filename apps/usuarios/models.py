@@ -96,13 +96,18 @@ class TokenInscricao(models.Model):
         blank=True
     )
     senha_gerada = models.CharField(max_length=128, verbose_name='Senha Gerada', blank=True)
-    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
-    utilizado = models.BooleanField(default=False, verbose_name='Utilizado')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação', db_index=True)
+    utilizado = models.BooleanField(default=False, verbose_name='Utilizado', db_index=True)
 
     class Meta:
         verbose_name = 'Token de Inscrição'
         verbose_name_plural = 'Tokens de Inscrição'
         ordering = ['-data_criacao']
+        indexes = [
+            models.Index(fields=['data_criacao'], name='token_inscricao_data_criacao_idx'),
+            models.Index(fields=['utilizado'], name='token_inscricao_utilizado_idx'),
+            models.Index(fields=['usuario', 'utilizado'], name='token_inscricao_usuario_utilizado_idx'),
+        ]
 
     def __str__(self):
         return f"Token para {self.usuario.email} - {self.data_criacao.strftime('%d/%m/%Y %H:%M')}"
@@ -262,13 +267,17 @@ class Propriedade(models.Model):
         verbose_name='Último Rendimento de Carcaça (%)'
     )
     
-    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação', db_index=True)
     data_atualizacao = models.DateTimeField(auto_now=True, verbose_name='Data de Atualização')
     
     class Meta:
         verbose_name = 'Propriedade'
         verbose_name_plural = 'Propriedades'
         ordering = ['-data_criacao']
+        indexes = [
+            models.Index(fields=['data_criacao'], name='propriedade_data_criacao_idx'),
+            models.Index(fields=['usuario'], name='propriedade_usuario_idx'),
+        ]
     
     def __str__(self):
         return f"Propriedade de {self.usuario.email}"
@@ -360,6 +369,11 @@ class Lote(models.Model):
         verbose_name = 'Lote'
         verbose_name_plural = 'Lotes'
         ordering = ['nome']
+        indexes = [
+            models.Index(fields=['propriedade'], name='lote_propriedade_idx'),
+            models.Index(fields=['nome'], name='lote_nome_idx'),
+            models.Index(fields=['propriedade', 'nome'], name='lote_propriedade_nome_idx'),
+        ]
     
     def __str__(self):
         return f"{self.nome} - {self.get_tipo_display()}"
@@ -390,9 +404,10 @@ class ProjecaoGanho(models.Model):
     )
     mes = models.IntegerField(
         choices=MES_CHOICES,
-        verbose_name='Mês'
+        verbose_name='Mês',
+        db_index=True
     )
-    ano = models.IntegerField(verbose_name='Ano')
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
     gmd_kg = models.DecimalField(
         max_digits=5,
         decimal_places=2,
@@ -408,6 +423,11 @@ class ProjecaoGanho(models.Model):
         verbose_name_plural = 'Projeções de Ganho'
         ordering = ['ano', 'mes']
         unique_together = ['lote', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['lote', 'ano', 'mes'], name='projecao_ganho_lote_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='projecao_ganho_ano_mes_idx'),
+            models.Index(fields=['lote', 'ano'], name='projecao_ganho_lote_ano_idx'),
+        ]
     
     def __str__(self):
         return f"{self.lote.nome} - {self.get_mes_display()}/{self.ano} - GMD: {self.gmd_kg} kg"
@@ -438,9 +458,10 @@ class GastoNutricional(models.Model):
     )
     mes = models.IntegerField(
         choices=MES_CHOICES,
-        verbose_name='Mês'
+        verbose_name='Mês',
+        db_index=True
     )
-    ano = models.IntegerField(verbose_name='Ano')
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
     gasto_diario = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -456,6 +477,11 @@ class GastoNutricional(models.Model):
         verbose_name_plural = 'Gastos Nutricionais'
         ordering = ['ano', 'mes']
         unique_together = ['lote', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['lote', 'ano', 'mes'], name='gasto_nutricional_lote_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='gasto_nutricional_ano_mes_idx'),
+            models.Index(fields=['lote', 'ano'], name='gasto_nutricional_lote_ano_idx'),
+        ]
     
     def __str__(self):
         return f"{self.lote.nome} - {self.get_mes_display()}/{self.ano} - R$ {self.gasto_diario}/dia"
@@ -513,9 +539,10 @@ class CustoFixo(models.Model):
     )
     mes = models.IntegerField(
         choices=MES_CHOICES,
-        verbose_name='Mês'
+        verbose_name='Mês',
+        db_index=True
     )
-    ano = models.IntegerField(verbose_name='Ano')
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
     valor = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -531,6 +558,11 @@ class CustoFixo(models.Model):
         verbose_name_plural = 'Custos Fixos'
         ordering = ['ano', 'mes', 'tipo']
         unique_together = ['propriedade', 'tipo', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['propriedade', 'ano', 'mes'], name='custo_fixo_propriedade_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='custo_fixo_ano_mes_idx'),
+            models.Index(fields=['propriedade', 'ano'], name='custo_fixo_propriedade_ano_idx'),
+        ]
     
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.get_mes_display()}/{self.ano} - R$ {self.valor}"
@@ -576,9 +608,10 @@ class Receita(models.Model):
     )
     mes = models.IntegerField(
         choices=MES_CHOICES,
-        verbose_name='Mês'
+        verbose_name='Mês',
+        db_index=True
     )
-    ano = models.IntegerField(verbose_name='Ano')
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
     valor = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -594,6 +627,11 @@ class Receita(models.Model):
         verbose_name_plural = 'Receitas'
         ordering = ['ano', 'mes', 'tipo']
         unique_together = ['propriedade', 'tipo', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['propriedade', 'ano', 'mes'], name='receita_propriedade_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='receita_ano_mes_idx'),
+            models.Index(fields=['propriedade', 'ano'], name='receita_propriedade_ano_idx'),
+        ]
     
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.get_mes_display()}/{self.ano} - R$ {self.valor}"
@@ -624,9 +662,10 @@ class Mortalidade(models.Model):
     )
     mes = models.IntegerField(
         choices=MES_CHOICES,
-        verbose_name='Mês'
+        verbose_name='Mês',
+        db_index=True
     )
-    ano = models.IntegerField(verbose_name='Ano')
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
     percentual = models.DecimalField(
         max_digits=5,
         decimal_places=2,
@@ -643,6 +682,11 @@ class Mortalidade(models.Model):
         verbose_name_plural = 'Mortalidades'
         ordering = ['ano', 'mes']
         unique_together = ['lote', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['lote', 'ano', 'mes'], name='mortalidade_lote_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='mortalidade_ano_mes_idx'),
+            models.Index(fields=['lote', 'ano'], name='mortalidade_lote_ano_idx'),
+        ]
     
     def __str__(self):
         return f"{self.lote.nome} - {self.get_mes_display()}/{self.ano} - {self.percentual}%"
