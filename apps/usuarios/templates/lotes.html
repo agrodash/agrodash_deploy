@@ -611,6 +611,34 @@ function toggleProjecao(loteId) {
     icon.style.transform = 'rotate(0deg)';
   }
 }
+
+// Calcular automaticamente o peso em arrobas quando o peso em kg for digitado
+$(document).ready(function() {
+  const pesoKgField = $('#id_peso_kg');
+  const pesoArrobaField = $('#id_peso_arroba');
+  
+  if (pesoKgField.length && pesoArrobaField.length) {
+    // Garantir que o campo de arrobas seja somente leitura
+    pesoArrobaField.prop('readonly', true);
+    
+    pesoKgField.on('input', function() {
+      const pesoKg = parseFloat($(this).val());
+      
+      if (!isNaN(pesoKg) && pesoKg > 0) {
+        const pesoArroba = pesoKg / 30;
+        pesoArrobaField.val(pesoArroba.toFixed(2));
+      } else if ($(this).val() === '') {
+        pesoArrobaField.val('');
+      }
+    });
+    
+    // Prevenir edição manual do campo de arrobas
+    pesoArrobaField.on('keydown paste', function(e) {
+      e.preventDefault();
+      return false;
+    });
+  }
+});
 </script>
 
 {% endblock %}

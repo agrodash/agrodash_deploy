@@ -347,6 +347,19 @@
                   </tr>
                   
                   <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Valor de Compra (R$)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"investimento_animais"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
                     <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Entrada @</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">

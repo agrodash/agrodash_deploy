@@ -337,6 +337,9 @@ def home_view(request):
 @login_required
 def nutricional_view(request):
     """View para gerenciar gastos nutricionais"""
+    from datetime import datetime
+    from decimal import Decimal
+    
     try:
         propriedade = Propriedade.objects.get(usuario=request.user)
     except (Propriedade.DoesNotExist, TypeError, ValueError):
@@ -347,20 +350,81 @@ def nutricional_view(request):
     # Busca lotes da propriedade
     lotes = Lote.objects.filter(propriedade=propriedade).order_by('nome')
     
-    gasto_form = GastoNutricionalForm(propriedade=propriedade)
+    # Ano e lote para exibição (padrão: ano atual)
+    ano_atual = datetime.now().year
+    ano = int(request.GET.get('ano', ano_atual))
+    lote_id = request.GET.get('lote', None)
+    lote_selecionado = None
     
-    # Processa formulário
-    if request.method == 'POST':
-        if 'save_gasto' in request.POST:
-            gasto_form = GastoNutricionalForm(request.POST, propriedade=propriedade)
-            if gasto_form.is_valid():
-                gasto_form.save()
-                messages.success(request, 'Gasto nutricional salvo com sucesso!')
-                return redirect('nutricional')
+    if lote_id:
+        try:
+            lote_selecionado = Lote.objects.get(id=int(lote_id), propriedade=propriedade)
+        except (Lote.DoesNotExist, ValueError, TypeError):
+            lote_selecionado = None
+    
+    # Processa formulário de múltiplos gastos
+    if request.method == 'POST' and 'salvar_gastos' in request.POST:
+        ano_post = int(request.POST.get('ano', ano_atual))
+        lote_id_post = request.POST.get('lote_id', None)
+        gastos_salvos = 0
+        
+        if lote_id_post:
+            try:
+                lote_post = Lote.objects.get(id=int(lote_id_post), propriedade=propriedade)
+                for mes_num in range(1, 13):  # Janeiro a Dezembro
+                    campo_key = f'gasto_mes_{mes_num}'
+                    if campo_key in request.POST:
+                        valor_str = request.POST[campo_key].strip()
+                        if valor_str:
+                            try:
+                                gasto_diario = Decimal(valor_str)
+                                if gasto_diario >= 0:
+                                    gasto_nutricional, created = GastoNutricional.objects.update_or_create(
+                                        lote=lote_post,
+                                        mes=mes_num,
+                                        ano=ano_post,
+                                        defaults={'gasto_diario': gasto_diario}
+                                    )
+                                    gastos_salvos += 1
+                            except (ValueError, TypeError, Exception):
+                                pass
+            except (Lote.DoesNotExist, ValueError, TypeError):
+                pass
+        
+        if gastos_salvos > 0:
+            messages.success(request, f'{gastos_salvos} gasto(s) nutricional(is) salvo(s) com sucesso!')
+        else:
+            messages.warning(request, 'Nenhum gasto nutricional foi salvo. Verifique os valores informados.')
+        
+        redirect_url = f'{request.path}?ano={ano_post}'
+        if lote_id_post:
+            redirect_url += f'&lote={lote_id_post}'
+        return redirect(redirect_url)
+    
+    # Buscar gastos existentes para o lote e ano selecionados
+    gastos_existentes = {}
+    if lote_selecionado:
+        for gasto in lote_selecionado.gastos_nutricionais.filter(ano=ano):
+            gastos_existentes[gasto.mes] = float(gasto.gasto_diario)
+    
+    # Meses do ano
+    meses_nomes = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho',
+        7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+    }
+    
+    meses_lista = list(range(1, 13))
+    anos_lista = list(range(2020, 2030))
     
     return render(request, 'nutricional.html', {
-        'gasto_form': gasto_form,
         'lotes': lotes,
+        'ano': ano,
+        'ano_atual': ano_atual,
+        'lote_selecionado': lote_selecionado,
+        'anos_lista': anos_lista,
+        'meses_lista': meses_lista,
+        'meses_nomes': meses_nomes,
+        'gastos_existentes': gastos_existentes,
         'user': request.user
     })
 

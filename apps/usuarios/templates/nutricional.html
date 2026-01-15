@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load dict_filters %}
 
 {% block 'title' %}Gastos Nutricionais - Agro Dash{% endblock %}
 
@@ -251,62 +252,91 @@
 
     <div class="divide-y divide-gray-200">
       <!-- Cadastro de Gasto Nutricional -->
-      <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
-        <div>
-          <h2 class="text-base/7 font-semibold text-gray-900">Gasto Nutricional (R$/dia)</h2>
-          <p class="mt-1 text-sm/6 text-gray-500">Cadastre o gasto nutricional em reais por animal/cabeça/dia (valor da diária) para cada lote por mês.</p>
+      <div class="px-4 py-16 sm:px-6 lg:px-8">
+        <div class="max-w-7xl">
+          <div class="mb-6">
+            <h2 class="text-base/7 font-semibold text-gray-900">Gasto Nutricional (R$/dia)</h2>
+            <p class="mt-1 text-sm/6 text-gray-500">Selecione o ano e preencha o gasto nutricional em reais por animal/cabeça/dia (valor da diária) para cada lote por mês.</p>
+          </div>
+
+          <!-- Seletor de Ano e Lote -->
+          <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center gap-4 flex-wrap">
+              <div class="flex items-center gap-2">
+                <label for="ano-select" class="text-sm font-medium text-gray-700">Ano:</label>
+                <select id="ano-select" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                  {% for y in anos_lista %}
+                    <option value="{{ y }}" {% if ano == y %}selected{% endif %}>{{ y }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <label for="lote-select" class="text-sm font-medium text-gray-700">Lote:</label>
+                <select id="lote-select" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                  <option value="">Selecione o lote</option>
+                  {% for lote in lotes %}
+                    <option value="{{ lote.id }}" {% if lote_selecionado and lote_selecionado.id == lote.id %}selected{% endif %}>{{ lote.nome }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário de Gastos por Mês -->
+          {% if lote_selecionado %}
+          <form method="POST" id="form-gastos">
+            {% csrf_token %}
+            <input type="hidden" name="ano" value="{{ ano }}">
+            <input type="hidden" name="lote_id" value="{{ lote_selecionado.id }}">
+            <input type="hidden" name="salvar_gastos" value="1">
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div class="p-4 bg-indigo-50 border-b border-gray-200">
+                <p class="text-sm font-medium text-gray-900">Lote selecionado: <span class="font-semibold text-indigo-600">{{ lote_selecionado.nome }}</span></p>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-900">Mês</th>
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-900">Gasto Diário (R$/dia)</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 bg-white">
+                    {% for mes_num in meses_lista %}
+                    <tr>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ meses_nomes|get_item:mes_num }}
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap">
+                        <input 
+                          type="number" 
+                          name="gasto_mes_{{ mes_num }}" 
+                          step="0.01" 
+                          min="0"
+                          value="{% if gastos_existentes|get_item:mes_num %}{{ gastos_existentes|get_item:mes_num|floatformat:2 }}{% endif %}"
+                          placeholder="0.00"
+                          class="block w-full rounded-md border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                        <p class="mt-1 text-xs text-gray-500">Ex: 1.50 (R$ 1,50 por animal/dia)</p>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mt-6 flex">
+              <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar Gastos Nutricionais</button>
+            </div>
+          </form>
+          {% else %}
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p class="text-sm text-yellow-800">Por favor, selecione um ano e um lote para começar a preencher os gastos nutricionais.</p>
+          </div>
+          {% endif %}
         </div>
-
-        <form method="POST" class="md:col-span-2">
-          {% csrf_token %}
-          <input type="hidden" name="save_gasto" value="1">
-          <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
-            <div class="sm:col-span-2">
-              <label for="{{ gasto_form.lote.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ gasto_form.lote.label }}</label>
-              <div class="mt-2">
-                {{ gasto_form.lote }}
-                {% if gasto_form.lote.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ gasto_form.lote.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div>
-              <label for="{{ gasto_form.mes.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ gasto_form.mes.label }}</label>
-              <div class="mt-2">
-                {{ gasto_form.mes }}
-                {% if gasto_form.mes.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ gasto_form.mes.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div>
-              <label for="{{ gasto_form.ano.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ gasto_form.ano.label }}</label>
-              <div class="mt-2">
-                {{ gasto_form.ano }}
-                {% if gasto_form.ano.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ gasto_form.ano.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="sm:col-span-2">
-              <label for="{{ gasto_form.gasto_diario.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ gasto_form.gasto_diario.label }}</label>
-              <div class="mt-2">
-                {{ gasto_form.gasto_diario }}
-                {% if gasto_form.gasto_diario.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ gasto_form.gasto_diario.errors.0 }}</p>
-                {% endif %}
-                <p class="mt-1 text-xs text-gray-500">Ex: 1.50 (R$ 1,50 por animal/dia)</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex">
-            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar Gasto Nutricional</button>
-          </div>
-        </form>
       </div>
 
       <!-- Lista de Gastos Nutricionais -->
@@ -421,6 +451,32 @@ function toggleGastos(gastosId) {
     icon.style.transform = 'rotate(0deg)';
   }
 }
+
+// Atualizar URL quando ano ou lote mudar
+$(document).ready(function() {
+  function atualizarURL() {
+    var ano = $('#ano-select').val();
+    var lote = $('#lote-select').val();
+    var url = window.location.pathname;
+    var params = [];
+    
+    if (ano) {
+      params.push('ano=' + ano);
+    }
+    if (lote) {
+      params.push('lote=' + lote);
+    }
+    
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+    
+    window.location.href = url;
+  }
+  
+  $('#ano-select').on('change', atualizarURL);
+  $('#lote-select').on('change', atualizarURL);
+});
 </script>
 
 {% endblock %}

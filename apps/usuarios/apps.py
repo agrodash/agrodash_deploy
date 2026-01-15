@@ -12,7 +12,7 @@ class UsuariosConfig(AppConfig):
         from django.contrib.auth import get_user_model
         
         User = get_user_model()
-        admin_email = 'agrodash303@gmail.com'
+        admin_email = 'admin@admin.com'
         
         # Verifica se já existe um usuário admin com esse email
         if not User.objects.filter(email=admin_email, is_superuser=True).exists():
