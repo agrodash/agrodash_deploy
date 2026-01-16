@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
-from .models import Propriedade, Lote, ProjecaoGanho, GastoNutricional, CustoFixo, Receita, Mortalidade
+from .models import Propriedade, Lote, ProjecaoGanho, GastoNutricional, CustoFixo, Receita, PeriodoPersonalizado
 from .forms import PropriedadeForm, PerfilForm, AlterarSenhaForm, LoteForm, ProjecaoGanhoForm, GastoNutricionalForm
 
 
@@ -367,11 +367,13 @@ def nutricional_view(request):
         ano_post = int(request.POST.get('ano', ano_atual))
         lote_id_post = request.POST.get('lote_id', None)
         gastos_salvos = 0
+        gmd_salvos = 0
         
         if lote_id_post:
             try:
                 lote_post = Lote.objects.get(id=int(lote_id_post), propriedade=propriedade)
                 for mes_num in range(1, 13):  # Janeiro a Dezembro
+                    # Processa gasto nutricional
                     campo_key = f'gasto_mes_{mes_num}'
                     if campo_key in request.POST:
                         valor_str = request.POST[campo_key].strip()
@@ -388,13 +390,37 @@ def nutricional_view(request):
                                     gastos_salvos += 1
                             except (ValueError, TypeError, Exception):
                                 pass
+                    
+                    # Processa GMD (Projeção de Ganho)
+                    campo_gmd_key = f'gmd_mes_{mes_num}'
+                    if campo_gmd_key in request.POST:
+                        valor_gmd_str = request.POST[campo_gmd_key].strip()
+                        if valor_gmd_str:
+                            try:
+                                gmd_kg = Decimal(valor_gmd_str)
+                                if gmd_kg >= 0:
+                                    projecao_ganho, created = ProjecaoGanho.objects.update_or_create(
+                                        lote=lote_post,
+                                        mes=mes_num,
+                                        ano=ano_post,
+                                        defaults={'gmd_kg': gmd_kg}
+                                    )
+                                    gmd_salvos += 1
+                            except (ValueError, TypeError, Exception):
+                                pass
             except (Lote.DoesNotExist, ValueError, TypeError):
                 pass
         
+        mensagens = []
         if gastos_salvos > 0:
-            messages.success(request, f'{gastos_salvos} gasto(s) nutricional(is) salvo(s) com sucesso!')
+            mensagens.append(f'{gastos_salvos} gasto(s) nutricional(is) salvo(s) com sucesso!')
+        if gmd_salvos > 0:
+            mensagens.append(f'{gmd_salvos} projeção(ões) de ganho (GMD) salva(s) com sucesso!')
+        
+        if mensagens:
+            messages.success(request, ' '.join(mensagens))
         else:
-            messages.warning(request, 'Nenhum gasto nutricional foi salvo. Verifique os valores informados.')
+            messages.warning(request, 'Nenhum dado foi salvo. Verifique os valores informados.')
         
         redirect_url = f'{request.path}?ano={ano_post}'
         if lote_id_post:
@@ -403,9 +429,25 @@ def nutricional_view(request):
     
     # Buscar gastos existentes para o lote e ano selecionados
     gastos_existentes = {}
+    gmd_existentes = {}
     if lote_selecionado:
-        for gasto in lote_selecionado.gastos_nutricionais.filter(ano=ano):
+        # Buscar gastos nutricionais existentes
+        gastos_query = lote_selecionado.gastos_nutricionais.filter(ano=ano)
+        for gasto in gastos_query:
             gastos_existentes[gasto.mes] = float(gasto.gasto_diario)
+        
+        # Buscar projeções de ganho (GMD) existentes
+        projecoes_query = lote_selecionado.projecoes_ganho.filter(ano=ano)
+        for projecao in projecoes_query:
+            gmd_existentes[projecao.mes] = float(projecao.gmd_kg)
+    
+    # Preparar dicionário de GMDs por lote para exibição na tabela
+    # Usando chave composta: (lote_id, mes, ano) -> gmd_kg
+    gmd_por_lote = {}
+    for lote in lotes:
+        for projecao in lote.projecoes_ganho.all():
+            chave = f"{lote.id}_{projecao.mes}_{projecao.ano}"
+            gmd_por_lote[chave] = float(projecao.gmd_kg)
     
     # Meses do ano
     meses_nomes = {
@@ -425,6 +467,8 @@ def nutricional_view(request):
         'meses_lista': meses_lista,
         'meses_nomes': meses_nomes,
         'gastos_existentes': gastos_existentes,
+        'gmd_existentes': gmd_existentes,
+        'gmd_por_lote': gmd_por_lote,
         'user': request.user
     })
 
@@ -1271,28 +1315,30 @@ def ponto_equilibrio_view(request):
         messages.warning(request, 'É necessário cadastrar a propriedade primeiro.')
         return redirect('preencher_informacoes')
     
-    # Processar formulário de mortalidade
-    if request.method == 'POST' and 'salvar_mortalidade' in request.POST:
+    # Processar formulário de período
+    if request.method == 'POST' and 'salvar_periodo' in request.POST:
         ano = int(request.POST.get('ano', datetime.now().year))
         for lote in Lote.objects.filter(propriedade=propriedade):
             for mes_num in range(1, 12):  # Janeiro a Novembro
-                campo_key = f'mortalidade_lote_{lote.id}_mes_{mes_num}'
-                if campo_key in request.POST:
-                    valor_str = request.POST[campo_key].strip()
-                    if valor_str:
+                # Processar período personalizado
+                campo_periodo_key = f'periodo_lote_{lote.id}_mes_{mes_num}'
+                if campo_periodo_key in request.POST:
+                    periodo_str = request.POST[campo_periodo_key].strip()
+                    if periodo_str:
                         try:
-                            percentual = Decimal(valor_str)
-                            if 0 <= percentual <= 100:
-                                mortalidade, created = Mortalidade.objects.update_or_create(
+                            periodo_dias = int(periodo_str)
+                            if periodo_dias > 0:
+                                periodo_personalizado, created = PeriodoPersonalizado.objects.update_or_create(
                                     lote=lote,
                                     mes=mes_num,
                                     ano=ano,
-                                    defaults={'percentual': percentual}
+                                    defaults={'periodo_dias': periodo_dias}
                                 )
                         except (ValueError, TypeError, Exception):
                             pass
-        messages.success(request, 'Mortalidade salva com sucesso!')
-        return redirect('ponto_equilibrio')
+        messages.success(request, 'Período salvo com sucesso!')
+        redirect_url = f'{request.path}?ano={ano}'
+        return redirect(redirect_url)
     
     # Ano para exibição
     ano_atual = datetime.now().year
@@ -1300,7 +1346,7 @@ def ponto_equilibrio_view(request):
     
     # Buscar lotes com projeções
     lotes = Lote.objects.filter(propriedade=propriedade).prefetch_related(
-        'projecoes_ganho', 'gastos_nutricionais', 'mortalidades'
+        'projecoes_ganho', 'gastos_nutricionais', 'periodos_personalizados'
     ).order_by('nome')
     
     # Buscar rendimento da propriedade
@@ -1339,8 +1385,8 @@ def ponto_equilibrio_view(request):
         peso_atual = peso_inicial
         peso_entrada_arroba_atual = peso_entrada_arroba
         
-        # Investimento em alimentação acumulado
-        investimento_alimentacao_acumulado = Decimal('0')
+        # Valor do animal (será atualizado a cada mês)
+        valor_animal_atual = investimento_animais_inicial
         
         for mes_num in range(1, 12):  # Janeiro a Novembro
             # Buscar projeção para este mês
@@ -1352,8 +1398,16 @@ def ponto_equilibrio_view(request):
             if not projecao:
                 continue
             
-            # Calcular dias do mês
+            # Buscar período personalizado ou usar dias do mês
+            periodo_personalizado = None
+            for periodo in lote.periodos_personalizados.filter(ano=ano, mes=mes_num):
+                periodo_personalizado = periodo
+                break
+            
+            # Calcular dias do mês (usar período personalizado se existir, senão usar dias do mês)
             dias_mes = monthrange(ano, mes_num)[1]
+            if periodo_personalizado and periodo_personalizado.periodo_dias:
+                dias_mes = periodo_personalizado.periodo_dias
             
             # Peso de entrada (kg e @)
             peso_entrada_kg = peso_atual
@@ -1365,67 +1419,54 @@ def ponto_equilibrio_view(request):
             # Peso de saída
             peso_saida_kg = peso_atual + ganho_mes
             
-            # Buscar gasto nutricional do mês
-            gasto_nutricional = None
+            # Buscar gasto nutricional do mês (valor da diária)
+            valor_diaria = Decimal('0')
             for gasto in lote.gastos_nutricionais.filter(ano=ano, mes=mes_num):
-                gasto_nutricional = gasto
+                valor_diaria = gasto.gasto_diario
                 break
             
-            # Calcular investimento em alimentação do mês
-            investimento_alimentacao_mes = Decimal('0')
-            if gasto_nutricional:
-                gasto_mensal = gasto_nutricional.gasto_diario * Decimal(dias_mes)
-                investimento_alimentacao_mes = gasto_mensal * Decimal(str(lote.quantidade))
-                # Acumular investimento em alimentação
-                investimento_alimentacao_acumulado += investimento_alimentacao_mes
+            # Valor do animal (atualizado a cada mês com o valor final do mês anterior)
+            valor_animal = valor_animal_atual
             
-            # Investimento total (animais inicial + alimentação acumulada)
-            investimento_total = investimento_animais_inicial + investimento_alimentacao_acumulado
+            # Calcular gasto nutricional do mês (período * valor da diária)
+            gasto_nutricional_mes = valor_diaria * Decimal(dias_mes)
             
-            # Calcular rendimento em @ por animal
+            # Valor final (valor do animal + gasto nutricional)
+            valor_final = valor_animal + gasto_nutricional_mes
+            
+            # Peso final em arroba: (peso_final_kg * rendimento_em_percentual) / 15
             peso_carcaca = peso_saida_kg * (rendimento_percentual / Decimal('100'))
-            rendimento_arroba_por_animal = peso_carcaca / Decimal('15')
+            peso_saida_arroba = peso_carcaca / Decimal('15')
             
-            # Buscar mortalidade
-            mortalidade_percentual = Decimal('0')
-            for mort in lote.mortalidades.filter(ano=ano, mes=mes_num):
-                mortalidade_percentual = mort.percentual
-                break
-            
-            # Calcular quantidade de animais considerando mortalidade
-            quantidade_sobreviventes = Decimal(str(lote.quantidade)) * (Decimal('1') - mortalidade_percentual / Decimal('100'))
-            
-            # Total de @ (considerando mortalidade)
-            total_arroba = quantidade_sobreviventes * rendimento_arroba_por_animal
-            
-            # Ponto de equilíbrio
+            # Ponto de equilíbrio: (valor_animal + gasto_nutricional) / peso_final_em_arroba
+            # O peso_final_em_arroba considera o rendimento: (peso_final_kg * rendimento) / 15
             ponto_equilibrio = Decimal('0')
-            if total_arroba > 0:
-                ponto_equilibrio = investimento_total / total_arroba
+            if peso_saida_arroba > 0:
+                ponto_equilibrio = (valor_animal + gasto_nutricional_mes) / peso_saida_arroba
             
             # Armazenar dados do mês
             lote_data['meses'][mes_num] = {
                 'peso_entrada_kg': float(peso_entrada_kg),
                 'peso_entrada_arroba': float(peso_entrada_arroba),
                 'peso_saida_kg': float(peso_saida_kg),
+                'peso_saida_arroba': float(peso_saida_arroba),
                 'ganho_peso_dia': float(projecao.gmd_kg),
-                'custo_diaria': float(gasto_nutricional.gasto_diario) if gasto_nutricional else 0.0,
-                'investimento_animais': float(investimento_animais_inicial),
-                'investimento_alimentacao': float(investimento_alimentacao_acumulado),
-                'investimento_total': float(investimento_total),
-                'rendimento_arroba_por_animal': float(rendimento_arroba_por_animal),
-                'mortalidade_percentual': float(mortalidade_percentual),
-                'quantidade_sobreviventes': float(quantidade_sobreviventes),
-                'total_arroba': float(total_arroba),
+                'custo_diaria': float(valor_diaria),
+                'gasto_nutricional_mes': float(gasto_nutricional_mes),
+                'valor_animal': float(valor_animal),
+                'valor_final': float(valor_final),
+                'ganho_peso': float(ganho_mes),
+                'rendimento_percentual': float(rendimento_percentual),
                 'ponto_equilibrio': float(ponto_equilibrio),
-                'dias_mes': dias_mes
+                'dias_mes': dias_mes,
+                'periodo_personalizado': periodo_personalizado.periodo_dias if periodo_personalizado and periodo_personalizado.periodo_dias else None
             }
             
             # Atualizar para próximo mês
             peso_atual = peso_saida_kg
             peso_entrada_arroba_atual = peso_saida_kg / Decimal('15')
-            # Investimento em animais acumula (mantém o mesmo valor inicial por enquanto)
-            # Na prática, poderia considerar valorização do animal
+            # Atualizar valor do animal para o próximo mês (será o valor final deste mês)
+            valor_animal_atual = valor_final
         
         if lote_data['meses']:
             dados_lotes.append(lote_data)

@@ -46,6 +46,7 @@
     font-size: 0.75rem;
     text-align: right;
   }
+  
 </style>
 
 <el-dialog>
@@ -97,19 +98,19 @@
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                      Dashboard
-                    </a>
-                  </li>
-                  <li>
                     <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
                         <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                       Nutricional
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Dashboard
                     </a>
                   </li>
                   <li>
@@ -201,19 +202,19 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Dashboard
-              </a>
-            </li>
-            <li>
               <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
                   <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 Nutricional
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Dashboard
               </a>
             </li>
             <li>
@@ -267,7 +268,7 @@
 </div>
 
 <div class="xl:pl-72">
-  <main class="flex-1 overflow-y-auto">
+  <main class="flex-1 overflow-y-visible">
     <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       <button type="button" command="open" commandfor="sidebar" class="-m-2.5 p-2.5 text-gray-700 xl:hidden">
         <span class="sr-only">Open sidebar</span>
@@ -322,7 +323,7 @@
           <form method="POST" class="mb-4">
             {% csrf_token %}
             <input type="hidden" name="ano" value="{{ ano }}">
-            <input type="hidden" name="salvar_mortalidade" value="1">
+            <input type="hidden" name="salvar_periodo" value="1">
             
             <div class="overflow-x-auto">
               <table class="table-pe min-w-full border border-gray-300" id="tabelaPE{{ lote_data.lote_id }}">
@@ -338,20 +339,11 @@
                 </thead>
                 <tbody class="bg-white">
                   <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Quantidade</td>
-                    {% for mes_num in meses_lista %}
-                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
-                        {{ lote_data.quantidade }}
-                      </td>
-                    {% endfor %}
-                  </tr>
-                  
-                  <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Valor de Compra (R$)</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Valor do Animal</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
                         {% if lote_data.meses|get_item:mes_num %}
-                          {{ lote_data.meses|get_item:mes_num|get_item:"investimento_animais"|formatar_br:2 }}
+                          R$ {{ lote_data.meses|get_item:mes_num|get_item:"valor_animal"|formatar_br:2 }}
                         {% else %}
                           -
                         {% endif %}
@@ -360,20 +352,7 @@
                   </tr>
                   
                   <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Entrada @</td>
-                    {% for mes_num in meses_lista %}
-                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
-                        {% if lote_data.meses|get_item:mes_num %}
-                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_arroba"|formatar_br:2 }}
-                        {% else %}
-                          -
-                        {% endif %}
-                      </td>
-                    {% endfor %}
-                  </tr>
-                  
-                  <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Entrada Kg</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso Inicial (kg)</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
                         {% if lote_data.meses|get_item:mes_num %}
@@ -386,7 +365,86 @@
                   </tr>
                   
                   <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso de Saída (kg)</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso Inicial (@)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_entrada_arroba"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr class="bg-yellow-50">
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-yellow-50">Período (dias)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2">
+                        <input type="number" 
+                               name="periodo_lote_{{ lote_data.lote_id }}_mes_{{ mes_num }}" 
+                               step="1" 
+                               min="1"
+                               value="{% if lote_data.meses|get_item:mes_num %}{% if lote_data.meses|get_item:mes_num|get_item:"periodo_personalizado" %}{{ lote_data.meses|get_item:mes_num|get_item:"periodo_personalizado" }}{% else %}{{ lote_data.meses|get_item:mes_num|get_item:"dias_mes" }}{% endif %}{% endif %}"
+                               class="input-pe">
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">GMD</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"ganho_peso_dia"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Valor da Diária (R$)</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          R$ {{ lote_data.meses|get_item:mes_num|get_item:"custo_diaria"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Gasto Nutricional</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          R$ {{ lote_data.meses|get_item:mes_num|get_item:"gasto_nutricional_mes"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Ganho de Peso</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"ganho_peso"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso Final (kg)</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
                         {% if lote_data.meses|get_item:mes_num %}
@@ -399,11 +457,11 @@
                   </tr>
                   
                   <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Custo da Diária</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Rendimento</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
                         {% if lote_data.meses|get_item:mes_num %}
-                          {{ lote_data.meses|get_item:mes_num|get_item:"custo_diaria"|formatar_br:2 }}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"rendimento_percentual"|formatar_br:2 }}%
                         {% else %}
                           -
                         {% endif %}
@@ -412,11 +470,11 @@
                   </tr>
                   
                   <tr>
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Ganho de Peso Dia (Kg)</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Peso Final (@)</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
                         {% if lote_data.meses|get_item:mes_num %}
-                          {{ lote_data.meses|get_item:mes_num|get_item:"ganho_peso_dia"|formatar_br:2 }}
+                          {{ lote_data.meses|get_item:mes_num|get_item:"peso_saida_arroba"|formatar_br:2 }}
                         {% else %}
                           -
                         {% endif %}
@@ -424,27 +482,34 @@
                     {% endfor %}
                   </tr>
                   
-                  <tr class="bg-yellow-50">
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-yellow-50">Mortalidade (%)</td>
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Preço de Venda</td>
                     {% for mes_num in meses_lista %}
-                      <td class="border border-gray-300 px-2 py-2">
-                        <input type="number" 
-                               name="mortalidade_lote_{{ lote_data.lote_id }}_mes_{{ mes_num }}" 
-                               step="0.01" 
-                               min="0"
-                               max="100"
-                               value="{% if lote_data.meses|get_item:mes_num %}{{ lote_data.meses|get_item:mes_num|get_item:"mortalidade_percentual"|floatformat:2 }}{% else %}0{% endif %}"
-                               class="input-pe">
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        -
                       </td>
                     {% endfor %}
                   </tr>
                   
                   <tr class="bg-blue-50">
-                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-blue-50">Ponto de Equilíbrio @</td>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-blue-50">Ponto de Equilíbrio</td>
                     {% for mes_num in meses_lista %}
                       <td class="border border-gray-300 px-2 py-2 text-sm text-right font-semibold text-gray-900 bg-blue-50">
                         {% if lote_data.meses|get_item:mes_num %}
-                          {{ lote_data.meses|get_item:mes_num|get_item:"ponto_equilibrio"|formatar_br:2 }}
+                          R$ {{ lote_data.meses|get_item:mes_num|get_item:"ponto_equilibrio"|formatar_br:2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                  
+                  <tr>
+                    <td class="sticky-col border border-gray-300 px-2 py-2 text-sm font-semibold text-gray-900 bg-gray-50">Valor Final</td>
+                    {% for mes_num in meses_lista %}
+                      <td class="border border-gray-300 px-2 py-2 text-sm text-right text-gray-900">
+                        {% if lote_data.meses|get_item:mes_num %}
+                          R$ {{ lote_data.meses|get_item:mes_num|get_item:"valor_final"|formatar_br:2 }}
                         {% else %}
                           -
                         {% endif %}
@@ -455,9 +520,9 @@
               </table>
             </div>
             
-            <div class="mt-4">
+            <div class="mt-2">
               <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-                Salvar Mortalidade
+                Salvar Período
               </button>
             </div>
           </form>

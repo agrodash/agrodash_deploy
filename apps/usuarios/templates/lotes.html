@@ -52,19 +52,19 @@
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                      Dashboard
-                    </a>
-                  </li>
-                  <li>
                     <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
                         <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                       Nutricional
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                        <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      Dashboard
                     </a>
                   </li>
                   <li>
@@ -156,19 +156,19 @@
               </a>
             </li>
             <li>
-              <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Dashboard
-              </a>
-            </li>
-            <li>
               <a href="{% url 'nutricional' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
                   <path d="M12 3v18m-9-9h18M6.34 6.34l11.32 11.32M17.66 6.34l-11.32 11.32" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 Nutricional
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'lotes_dashboard' %}" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
+                  <path d="M3 13l9 9 9-9M3 3l9 9 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Dashboard
               </a>
             </li>
             <li>
@@ -401,137 +401,6 @@
       </div>
       {% endif %}
 
-      <!-- Projeção de Ganho -->
-      <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
-        <div>
-          <h2 class="text-base/7 font-semibold text-gray-900">Projeção de Ganho (GMD)</h2>
-          <p class="mt-1 text-sm/6 text-gray-500">Cadastre o ganho médio diário (GMD) em quilos para cada lote por mês.</p>
-        </div>
-
-        <form method="POST" class="md:col-span-2">
-          {% csrf_token %}
-          <input type="hidden" name="save_projecao" value="1">
-          <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
-            <div class="sm:col-span-2">
-              <label for="{{ projecao_form.lote.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ projecao_form.lote.label }}</label>
-              <div class="mt-2">
-                {{ projecao_form.lote }}
-                {% if projecao_form.lote.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ projecao_form.lote.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div>
-              <label for="{{ projecao_form.mes.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ projecao_form.mes.label }}</label>
-              <div class="mt-2">
-                {{ projecao_form.mes }}
-                {% if projecao_form.mes.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ projecao_form.mes.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div>
-              <label for="{{ projecao_form.ano.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ projecao_form.ano.label }}</label>
-              <div class="mt-2">
-                {{ projecao_form.ano }}
-                {% if projecao_form.ano.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ projecao_form.ano.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div>
-              <label for="{{ projecao_form.gmd_kg.id_for_label }}" class="block text-sm/6 font-medium text-gray-900">{{ projecao_form.gmd_kg.label }}</label>
-              <div class="mt-2">
-                {{ projecao_form.gmd_kg }}
-                {% if projecao_form.gmd_kg.errors %}
-                  <p class="mt-1 text-xs text-red-600">{{ projecao_form.gmd_kg.errors.0 }}</p>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex">
-            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar Projeção</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tabela de Projeções -->
-      {% if lotes %}
-      <div class="px-4 py-16 sm:px-6 lg:px-8">
-        <div class="sm:flex sm:items-center">
-          <div class="sm:flex-auto">
-            <h2 class="text-base/7 font-semibold text-gray-900">Projeções de Ganho por Lote</h2>
-            <p class="mt-1 text-sm/6 text-gray-500">Clique em um lote para visualizar suas projeções de GMD cadastradas.</p>
-          </div>
-        </div>
-        
-        <div class="mt-8 space-y-2">
-          {% for lote in lotes %}
-          {% if lote.projecoes_ganho.all %}
-          <div class="border border-gray-200 rounded-lg overflow-hidden">
-            <button 
-              type="button"
-              onclick="toggleProjecao('lote-{{ lote.id }}')"
-              class="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset transition-colors"
-            >
-              <div class="flex items-center gap-3">
-                <svg 
-                  id="icon-lote-{{ lote.id }}"
-                  class="size-5 text-gray-400 transition-transform duration-200"
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-                <h3 class="text-sm font-semibold text-gray-900">{{ lote.nome }}</h3>
-                <span class="text-xs text-gray-500">({{ lote.projecoes_ganho.count }} projeção{{ lote.projecoes_ganho.count|pluralize:"ões" }})</span>
-              </div>
-            </button>
-            
-            <div 
-              id="lote-{{ lote.id }}"
-              class="hidden border-t border-gray-200 bg-gray-50"
-            >
-              <div class="px-6 py-4">
-                <div class="overflow-x-auto">
-                  <table id="tabelaProjecoes-{{ lote.id }}" class="min-w-full divide-y divide-gray-300">
-                    <thead>
-                      <tr>
-                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm/6 font-semibold text-gray-900 sm:pl-0">Mês</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm/6 font-semibold text-gray-900">Ano</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm/6 font-semibold text-gray-900">GMD (kg)</th>
-                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                          <span class="sr-only">Ações</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                      {% for projecao in lote.projecoes_ganho.all %}
-                      <tr>
-                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0" data-order="{{ projecao.mes }}">{{ projecao.get_mes_display }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ projecao.ano }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" data-order="{{ projecao.gmd_kg }}">{{ projecao.gmd_kg }} kg</td>
-                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                          <a href="{% url 'deletar_projecao' projecao.id %}" onclick="return confirm('Tem certeza que deseja deletar esta projeção?')" class="text-red-600 hover:text-red-900">Deletar</a>
-                        </td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
     </div>
   </main>
 </div>
@@ -571,46 +440,6 @@ $(document).ready(function() {
     ]
   });
 });
-
-function toggleProjecao(loteId) {
-  const content = document.getElementById(loteId);
-  const icon = document.getElementById('icon-' + loteId);
-  const tableId = 'tabelaProjecoes-' + loteId.replace('lote-', '');
-  
-  if (content.classList.contains('hidden')) {
-    content.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-    
-    // Inicializar DataTable quando a tabela for exibida
-    if (!$.fn.DataTable.isDataTable('#' + tableId)) {
-      $('#' + tableId).DataTable({
-        language: {
-          url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json',
-          search: "Pesquisar:",
-          lengthMenu: "Mostrar _MENU_ registros por página",
-          info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty: "Mostrando 0 a 0 de 0 registros",
-          infoFiltered: "(filtrado de _MAX_ registros no total)",
-          paginate: {
-            first: "Primeiro",
-            last: "Último",
-            next: "Próximo",
-            previous: "Anterior"
-          }
-        },
-        pageLength: 10,
-        responsive: true,
-        order: [[1, 'asc'], [0, 'asc']], // Ordenar por ano e depois por mês
-        columnDefs: [
-          { orderable: false, targets: -1 } // Desabilitar ordenação na coluna de ações
-        ]
-      });
-    }
-  } else {
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-  }
-}
 
 // Calcular automaticamente o peso em arrobas quando o peso em kg for digitado
 $(document).ready(function() {

@@ -104,9 +104,9 @@ class TokenInscricao(models.Model):
         verbose_name_plural = 'Tokens de Inscrição'
         ordering = ['-data_criacao']
         indexes = [
-            models.Index(fields=['data_criacao'], name='token_inscricao_data_criacao_idx'),
-            models.Index(fields=['utilizado'], name='token_inscricao_utilizado_idx'),
-            models.Index(fields=['usuario', 'utilizado'], name='token_inscricao_usuario_utilizado_idx'),
+            models.Index(fields=['data_criacao'], name='token_insc_data_criacao_idx'),
+            models.Index(fields=['utilizado'], name='token_insc_utilizado_idx'),
+            models.Index(fields=['usuario', 'utilizado'], name='token_insc_user_util_idx'),
         ]
 
     def __str__(self):
@@ -424,9 +424,9 @@ class ProjecaoGanho(models.Model):
         ordering = ['ano', 'mes']
         unique_together = ['lote', 'mes', 'ano']
         indexes = [
-            models.Index(fields=['lote', 'ano', 'mes'], name='projecao_ganho_lote_ano_mes_idx'),
-            models.Index(fields=['ano', 'mes'], name='projecao_ganho_ano_mes_idx'),
-            models.Index(fields=['lote', 'ano'], name='projecao_ganho_lote_ano_idx'),
+            models.Index(fields=['lote', 'ano', 'mes'], name='proj_ganho_lote_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='proj_ganho_ano_mes_idx'),
+            models.Index(fields=['lote', 'ano'], name='proj_ganho_lote_ano_idx'),
         ]
     
     def __str__(self):
@@ -478,9 +478,9 @@ class GastoNutricional(models.Model):
         ordering = ['ano', 'mes']
         unique_together = ['lote', 'mes', 'ano']
         indexes = [
-            models.Index(fields=['lote', 'ano', 'mes'], name='gasto_nutricional_lote_ano_mes_idx'),
-            models.Index(fields=['ano', 'mes'], name='gasto_nutricional_ano_mes_idx'),
-            models.Index(fields=['lote', 'ano'], name='gasto_nutricional_lote_ano_idx'),
+            models.Index(fields=['lote', 'ano', 'mes'], name='gasto_nutr_lote_ano_mes_idx'),
+            models.Index(fields=['ano', 'mes'], name='gasto_nutr_ano_mes_idx'),
+            models.Index(fields=['lote', 'ano'], name='gasto_nutr_lote_ano_idx'),
         ]
     
     def __str__(self):
@@ -559,9 +559,9 @@ class CustoFixo(models.Model):
         ordering = ['ano', 'mes', 'tipo']
         unique_together = ['propriedade', 'tipo', 'mes', 'ano']
         indexes = [
-            models.Index(fields=['propriedade', 'ano', 'mes'], name='custo_fixo_propriedade_ano_mes_idx'),
+            models.Index(fields=['propriedade', 'ano', 'mes'], name='custo_fixo_prop_ano_mes_idx'),
             models.Index(fields=['ano', 'mes'], name='custo_fixo_ano_mes_idx'),
-            models.Index(fields=['propriedade', 'ano'], name='custo_fixo_propriedade_ano_idx'),
+            models.Index(fields=['propriedade', 'ano'], name='custo_fixo_prop_ano_idx'),
         ]
     
     def __str__(self):
@@ -628,9 +628,9 @@ class Receita(models.Model):
         ordering = ['ano', 'mes', 'tipo']
         unique_together = ['propriedade', 'tipo', 'mes', 'ano']
         indexes = [
-            models.Index(fields=['propriedade', 'ano', 'mes'], name='receita_propriedade_ano_mes_idx'),
+            models.Index(fields=['propriedade', 'ano', 'mes'], name='receita_prop_ano_mes_idx'),
             models.Index(fields=['ano', 'mes'], name='receita_ano_mes_idx'),
-            models.Index(fields=['propriedade', 'ano'], name='receita_propriedade_ano_idx'),
+            models.Index(fields=['propriedade', 'ano'], name='receita_prop_ano_idx'),
         ]
     
     def __str__(self):
@@ -690,3 +690,45 @@ class Mortalidade(models.Model):
     
     def __str__(self):
         return f"{self.lote.nome} - {self.get_mes_display()}/{self.ano} - {self.percentual}%"
+
+
+class PeriodoPersonalizado(models.Model):
+    """Modelo para armazenar período personalizado por lote e mês"""
+    MES_CHOICES = [
+        (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'), (5, 'Maio'), (6, 'Junho'),
+        (7, 'Julho'), (8, 'Agosto'), (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro'),
+    ]
+    
+    lote = models.ForeignKey(
+        Lote,
+        on_delete=models.CASCADE,
+        related_name='periodos_personalizados',
+        verbose_name='Lote'
+    )
+    mes = models.IntegerField(
+        choices=MES_CHOICES,
+        verbose_name='Mês',
+        db_index=True
+    )
+    ano = models.IntegerField(verbose_name='Ano', db_index=True)
+    periodo_dias = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        verbose_name='Período (dias)'
+    )
+    
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
+    data_atualizacao = models.DateTimeField(auto_now=True, verbose_name='Data de Atualização')
+    
+    class Meta:
+        verbose_name = 'Período Personalizado'
+        verbose_name_plural = 'Períodos Personalizados'
+        ordering = ['ano', 'mes']
+        unique_together = ['lote', 'mes', 'ano']
+        indexes = [
+            models.Index(fields=['lote', 'ano', 'mes'], name='periodo_pers_lote_ano_mes_idx'),
+        ]
+    
+    def __str__(self):
+        return f"{self.lote.nome} - {self.get_mes_display()}/{self.ano} - {self.periodo_dias} dias"
